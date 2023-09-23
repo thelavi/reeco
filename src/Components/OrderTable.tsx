@@ -8,6 +8,7 @@ import EditProductForm from "./EditProductForm";
 import CancelModal from "./CancelModal";
 import { tableHeader } from "../Constants";
 import AddForm from "./AddForm";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const TableContainer = styled.div`
   display: flex;
@@ -99,6 +100,25 @@ const Button = styled.button`
   &.cancel {
     background-color: #ff6b6b;
     color: white;
+  }
+`;
+const ApproveIcon = styled(FaCheckCircle)`
+  font-size: 20px;
+  margin-right: 50px;
+
+  &.approved {
+    color: green;
+  }
+`;
+const CancelIcon = styled(FaTimesCircle)`
+  font-size: 20px;
+  margin-right: 50px;
+
+  &.missing {
+    color: orange;
+  }
+  &.urgent {
+    color: red;
   }
 `;
 const Buttons = styled.div`
@@ -196,26 +216,28 @@ const OrderTable = () => {
           <TableCell>₹{(item.price * item.quantity).toFixed(2)}</TableCell>
           <StatusCell status={item.status}>{item.status || ""}</StatusCell>
           <TableCell>
-            <Button
-              className="approve"
+            <ApproveIcon
+              className={item.status === "Approved" ? "approved" : ""}
               onClick={() => {
                 if (!OrderApproval_status) {
                   onClickApprove(item);
                 } else alert("Order Already Approved");
               }}
-            >
-              Approve
-            </Button>
-            <Button
-              className="cancel"
+            />
+            <CancelIcon
+              className={
+                item.status === "Missing"
+                  ? "missing"
+                  : item.status === "Missing-Urgent"
+                  ? "urgent"
+                  : ""
+              }
               onClick={() => {
                 if (!OrderApproval_status) {
                   openCancelModal(item);
                 } else alert("Order Already Approved");
               }}
-            >
-              Cancel
-            </Button>
+            />
             <Button
               onClick={() => {
                 if (!OrderApproval_status) {
