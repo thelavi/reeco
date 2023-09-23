@@ -123,6 +123,12 @@ const CancelButton = styled.button`
   font-size: 16px;
 `;
 
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+`;
+
 const EditProductForm = (props: {
   product: {
     productName: string;
@@ -145,20 +151,51 @@ const EditProductForm = (props: {
     status: product.status,
     reason: product.reason,
   });
+  const [errors, setErrors] = useState({
+    price: "",
+    quantity: "",
+    reason: "",
+  });
 
   const handlePriceChange = (event: any) => {
     const newPrice = parseFloat(event.target.value);
     setEditedProduct({ ...editedProduct, price: newPrice });
+    if (newPrice <= 0) {
+      setErrors({ ...errors, price: "Price must be greater than 0" });
+    } else {
+      setErrors({ ...errors, price: "" });
+    }
   };
 
   const handleQuantityChange = (event: any) => {
     const newQuantity = parseInt(event.target.value);
     setEditedProduct({ ...editedProduct, quantity: newQuantity });
+    if (newQuantity <= 0) {
+      setErrors({ ...errors, quantity: "Quantity must be greater than 0" });
+    } else {
+      setErrors({ ...errors, quantity: "" });
+    }
   };
 
   const handleReasonChange = (event: any) => {
     const reason = event.target.value;
     setEditedProduct({ ...editedProduct, reason: reason });
+    if (!reason.trim()) {
+      setErrors({ ...errors, reason: "Reason is required" });
+    } else {
+      setErrors({ ...errors, reason: "" });
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      editedProduct.price > 0 &&
+      editedProduct.quantity > 0 &&
+      editedProduct.reason.trim() !== "" &&
+      errors.price === "" &&
+      errors.quantity === "" &&
+      errors.reason === ""
+    );
   };
 
   return (
@@ -176,6 +213,7 @@ const EditProductForm = (props: {
                 value={editedProduct.price}
                 onChange={handlePriceChange}
               />
+              {errors.price && <ErrorMessage>{errors.price}</ErrorMessage>}
             </div>
             <QuantityContainer>
               <QuantityLabel>Quantity:</QuantityLabel>
@@ -184,6 +222,9 @@ const EditProductForm = (props: {
                 value={editedProduct.quantity}
                 onChange={handleQuantityChange}
               />
+              {errors.quantity && (
+                <ErrorMessage>{errors.quantity}</ErrorMessage>
+              )}
             </QuantityContainer>
             <TotalLabel>
               Total: ₹
@@ -198,12 +239,25 @@ const EditProductForm = (props: {
                 value={editedProduct.reason}
                 onChange={handleReasonChange}
               />
+              {errors.reason && <ErrorMessage>{errors.reason}</ErrorMessage>}
             </div>
           </EditFields>
         </EditFormContent>
         <ButtonsContainer>
           <CancelButton onClick={() => onCancel()}>Cancel</CancelButton>
-          <SaveButton onClick={() => onSave(editedProduct)}>Save</SaveButton>
+          <SaveButton
+            onClick={() => {
+              if (isFormValid()) {
+                onSave(editedProduct);
+              } else {
+                if (!editedProduct.reason.trim()) {
+                  setErrors({ ...errors, reason: "Reason is required" });
+                }
+              }
+            }}
+          >
+            Save
+          </SaveButton>
         </ButtonsContainer>
       </EditFormContainer>
     </EditFormBackdrop>
